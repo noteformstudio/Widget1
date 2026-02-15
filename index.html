@@ -619,6 +619,11 @@ function applyTheme(name){
   timerDisplay.style.color = t.text;
   progressCircle.style.stroke = t.text;
 
+  // Update settings panel label colors
+  document.querySelectorAll('.settings-panel label').forEach(label => {
+    label.style.color = t.text;
+  });
+
   [startBtn,pauseBtn,resetBtn,saveBtn].forEach(btn=>{
     btn.style.background = t.btnBg;
     btn.style.color = t.btnText;
