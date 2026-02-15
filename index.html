@@ -9,7 +9,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif;
-  background: #f6f3ee;
+  background: transparent;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -34,9 +34,9 @@ body {
 }
 
 .header {
-  font-size: 36px;
+  font-size: 22px;
   font-weight: bold;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
 }
 
 .settings-gear {
@@ -52,12 +52,6 @@ body {
 .settings-gear:hover {
   transform: rotate(90deg);
   opacity: 1;
-}
-
-.focus-text {
-  font-size: 30px;
-  font-weight: bold;
-  margin-bottom: 15px;
 }
 
 /* Timer with circular progress ring */
@@ -99,15 +93,20 @@ body {
 }
 
 .timer-controls button {
-  padding: 10px 14px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   border: none;
-  border-radius: 8px;
+  border-radius: 50%;
   cursor: pointer;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 18px;
   transition: all 0.2s ease;
   transform: translateY(0);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .timer-controls button:hover {
@@ -326,10 +325,9 @@ body {
 
 <div class="card" id="card">
   <div class="settings-gear" id="gear">⚙</div>
-  <div class="header">Today's Focus</div>
+  <div class="header" id="headerDisplay">Today's Focus: <span id="focusDisplay">Focus</span></div>
 
   <div class="timer-content" id="timerContent">
-    <div class="focus-text" id="focusDisplay">Focus</div>
     
     <div class="timer-container">
       <svg class="progress-ring" width="180" height="180" style="transform: rotate(-90deg);">
@@ -358,9 +356,9 @@ body {
     </div>
 
     <div class="timer-controls">
-      <button id="startBtn">Start</button>
-      <button id="pauseBtn">Pause</button>
-      <button id="resetBtn">Reset</button>
+      <button id="startBtn">▶</button>
+      <button id="pauseBtn">⏸</button>
+      <button id="resetBtn">↻</button>
     </div>
   </div>
 
@@ -620,7 +618,6 @@ function applyTheme(name){
   card.style.background = t.bg;
   document.querySelector('.header').style.color = t.text;
   document.querySelector('.settings-gear').style.color = t.text;
-  focusDisplay.style.color = t.text;
   timerDisplay.style.color = t.text;
   progressCircle.style.stroke = t.text;
 
