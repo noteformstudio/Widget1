@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Today's Focus</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f6f3ee;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.card {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 380px;
+  min-height: 250px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.10);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.header {
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 25px;
+}
+
+.settings-gear {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  cursor: pointer;
+  font-size: 24px;
+  transition: transform 0.3s ease, opacity 0.2s ease;
+  opacity: 0.6;
+}
+
+.settings-gear:hover {
+  transform: rotate(90deg);
+  opacity: 1;
+}
+
+.focus-text {
+  font-size: 30px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+/* Timer with circular progress ring */
+.timer-container {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.progress-ring-circle {
+  transition: stroke-dashoffset 0.3s ease;
+  transform-origin: 50% 50%;
+}
+
+.timer-display {
+  font-size: 36px;
+  font-weight: bold;
+  position: relative;
+  z-index: 1;
+}
+
+.timer-controls {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.timer-controls button {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.timer-controls button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.timer-controls button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.settings-panel {
+  display: none;
+  margin-top: 0;
+  text-align: left;
+}
+
+.settings-panel.open {
+  display: block;
+}
+
+.settings-panel label {
+  display: block;
+  margin: 10px 0 5px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.settings-panel select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  background: #ffffff;
+  height: 40px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.settings-panel select:hover {
+  border-color: #999;
+}
+
+.settings-panel select:focus {
+  outline: none;
+  border-color: #666;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+}
+
+/* Custom Theme Dropdown */
+.custom-select {
+  position: relative;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.select-selected {
+  background: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  height: 40px;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.select-selected:hover {
+  border-color: #999;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.select-selected-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.select-arrow {
+  transition: transform 0.3s ease;
+}
+
+.select-arrow.open {
+  transform: rotate(180deg);
+}
+
+.select-items {
+  position: absolute;
+  top: 45px;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  z-index: 100;
+  display: none;
+  max-height: 280px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.select-items.open {
+  display: block;
+}
+
+.select-items div {
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.select-items div:hover {
+  background: #f5f5f5;
+}
+
+.color-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.select-items div:hover .color-swatch {
+  transform: scale(1.1);
+}
+
+.save-btn {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  margin-top: 10px;
+  transition: all 0.2s ease;
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.save-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.save-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Hide timer content when settings are open */
+.timer-content {
+  display: block;
+}
+
+.timer-content.hidden {
+  display: none;
+}
+
+/* Breathing animation for timer while running */
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.9;
+  }
+}
+
+.timer-container.breathing .progress-ring-circle {
+  animation: breathe 2.5s ease-in-out infinite;
+}
+
+/* Completion pulse animation */
+@keyframes completionPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  25% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  75% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+.timer-container.complete {
+  animation: completionPulse 1s ease-in-out;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card" id="card">
+  <div class="settings-gear" id="gear">⚙</div>
+  <div class="header">Today's Focus</div>
+
+  <div class="timer-content" id="timerContent">
+    <div class="focus-text" id="focusDisplay">Focus</div>
+    
+    <div class="timer-container">
+      <svg class="progress-ring" width="180" height="180" style="transform: rotate(-90deg);">
+        <circle
+          class="progress-ring-background"
+          stroke="#e0e0e0"
+          stroke-width="12"
+          fill="transparent"
+          r="82"
+          cx="90"
+          cy="90"
+        />
+        <circle
+          id="progressCircle"
+          class="progress-ring-circle"
+          stroke="#373530"
+          stroke-width="12"
+          fill="transparent"
+          r="82"
+          cx="90"
+          cy="90"
+          stroke-linecap="round"
+        />
+      </svg>
+      <div class="timer-display" id="timerDisplay">25:00</div>
+    </div>
+
+    <div class="timer-controls">
+      <button id="startBtn">Start</button>
+      <button id="pauseBtn">Pause</button>
+      <button id="resetBtn">Reset</button>
+    </div>
+  </div>
+
+  <div class="settings-panel" id="settingsPanel">
+    <label>Set your focus:</label>
+    <div class="custom-select" id="focusSelectCustom"></div>
+
+    <label>Choose a theme:</label>
+    <div class="custom-select" id="themeSelect"></div>
+
+    <label>Set timer (minutes):</label>
+    <div class="custom-select" id="timerSelectCustom"></div>
+
+    <button class="save-btn" id="saveBtn">Save</button>
+  </div>
+</div>
+
+<script>
+const themes = {
+  Default: { bg:"#FFFFFF", text:"#373530", btnBg:"#373530", btnText:"#ffffff" },
+  Gray:    { bg:"#F1F1EF", text:"#787774", btnBg:"#787774", btnText:"#ffffff" },
+  Brown:   { bg:"#F3EEEE", text:"#976D57", btnBg:"#976D57", btnText:"#ffffff" },
+  Orange:  { bg:"#F8ECDF", text:"#CC782F", btnBg:"#CC782F", btnText:"#ffffff" },
+  Yellow:  { bg:"#FAF3DD", text:"#C29343", btnBg:"#C29343", btnText:"#000000" },
+  Green:   { bg:"#EEF3ED", text:"#548164", btnBg:"#548164", btnText:"#ffffff" },
+  Blue:    { bg:"#E9F3F7", text:"#487CA5", btnBg:"#487CA5", btnText:"#ffffff" },
+  Purple:  { bg:"#F6F3F8", text:"#8A67AB", btnBg:"#8A67AB", btnText:"#ffffff" },
+  Pink:    { bg:"#F9F2F5", text:"#B35488", btnBg:"#B35488", btnText:"#ffffff" },
+  Red:     { bg:"#FAECEC", text:"#C4554D", btnBg:"#C4554D", btnText:"#ffffff" },
+  Dark:    { bg:"#191919", text:"#D4D4D4", btnBg:"#D4D4D4", btnText:"#191919" }
+};
+
+const card = document.getElementById("card");
+const focusDisplay = document.getElementById("focusDisplay");
+const timerDisplay = document.getElementById("timerDisplay");
+const startBtn = document.getElementById("startBtn");
+const pauseBtn = document.getElementById("pauseBtn");
+const resetBtn = document.getElementById("resetBtn");
+const saveBtn = document.getElementById("saveBtn");
+const themeSelect = document.getElementById("themeSelect");
+const timerSelectCustom = document.getElementById("timerSelectCustom");
+const focusSelectCustom = document.getElementById("focusSelectCustom");
+const progressCircle = document.getElementById("progressCircle");
+const timerContainer = document.querySelector(".timer-container");
+
+let currentTheme = "Default";
+let timer = 1500;
+let totalTime = 1500;
+let interval;
+let selectedTimerMinutes = 25;
+let selectedFocus = "Focus";
+let isRunning = false;
+
+// Create bell sound using Web Audio API
+function playBellSound() {
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  
+  oscillator.frequency.value = 800;
+  oscillator.type = 'sine';
+  
+  gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+  
+  oscillator.start(audioContext.currentTime);
+  oscillator.stop(audioContext.currentTime + 1);
+}
+
+// Progress ring setup
+const radius = 82;
+const circumference = 2 * Math.PI * radius;
+progressCircle.style.strokeDasharray = circumference;
+progressCircle.style.strokeDashoffset = 0;
+
+function updateProgressRing() {
+  const progress = timer / totalTime;
+  // Clockwise animation
+  const offset = circumference * (1 - progress);
+  progressCircle.style.strokeDashoffset = offset;
+}
+
+/* Build Custom Focus Dropdown */
+const focusOptions = ["Focus", "Work", "Study", "Deep Work", "Reading", "Writing", "Creative"];
+
+const focusSelected = document.createElement("div");
+focusSelected.className = "select-selected";
+
+const focusSelectedContent = document.createElement("div");
+focusSelectedContent.className = "select-selected-content";
+focusSelected.appendChild(focusSelectedContent);
+
+const focusArrow = document.createElement("span");
+focusArrow.className = "select-arrow";
+focusArrow.textContent = "▾";
+focusSelected.appendChild(focusArrow);
+
+focusSelectCustom.appendChild(focusSelected);
+
+const focusItems = document.createElement("div");
+focusItems.className = "select-items";
+focusSelectCustom.appendChild(focusItems);
+
+function updateFocusDisplay(focusText){
+  focusSelectedContent.innerHTML = `<span>${focusText}</span>`;
+}
+
+focusOptions.forEach(focusOption => {
+  const option = document.createElement("div");
+  option.innerHTML = `<span>${focusOption}</span>`;
+  option.onclick = ()=>{
+    selectedFocus = focusOption;
+    updateFocusDisplay(focusOption);
+    focusDisplay.textContent = focusOption;
+    localStorage.setItem("focus", focusOption);
+    focusItems.classList.remove("open");
+    focusArrow.classList.remove("open");
+  };
+  focusItems.appendChild(option);
+});
+
+focusSelected.onclick = ()=>{
+  const isOpen = focusItems.classList.toggle("open");
+  focusArrow.classList.toggle("open", isOpen);
+  // Close other dropdowns if open
+  items.classList.remove("open");
+  arrow.classList.remove("open");
+  timerItems.classList.remove("open");
+  timerArrow.classList.remove("open");
+};
+
+/* Build Custom Theme Dropdown */
+const selected = document.createElement("div");
+selected.className = "select-selected";
+
+const selectedContent = document.createElement("div");
+selectedContent.className = "select-selected-content";
+selected.appendChild(selectedContent);
+
+const arrow = document.createElement("span");
+arrow.className = "select-arrow";
+arrow.textContent = "▾";
+selected.appendChild(arrow);
+
+themeSelect.appendChild(selected);
+
+const items = document.createElement("div");
+items.className = "select-items";
+themeSelect.appendChild(items);
+
+function updateSelectedDisplay(name){
+  selectedContent.innerHTML = `
+    <span class="color-swatch" style="background:${themes[name].bg}"></span>
+    <span>${name}</span>
+  `;
+}
+
+for(let name in themes){
+  const option = document.createElement("div");
+  option.innerHTML = `
+    <span class="color-swatch" style="background:${themes[name].bg}"></span>
+    <span>${name}</span>
+  `;
+  option.onclick = ()=>{
+    currentTheme = name;
+    updateSelectedDisplay(name);
+    applyTheme(name);
+    items.classList.remove("open");
+    arrow.classList.remove("open");
+  };
+  items.appendChild(option);
+}
+
+selected.onclick = ()=>{
+  const isOpen = items.classList.toggle("open");
+  arrow.classList.toggle("open", isOpen);
+  // Close other dropdowns if open
+  timerItems.classList.remove("open");
+  timerArrow.classList.remove("open");
+  focusItems.classList.remove("open");
+  focusArrow.classList.remove("open");
+};
+
+/* Build Custom Timer Dropdown */
+const timerSelected = document.createElement("div");
+timerSelected.className = "select-selected";
+
+const timerSelectedContent = document.createElement("div");
+timerSelectedContent.className = "select-selected-content";
+timerSelected.appendChild(timerSelectedContent);
+
+const timerArrow = document.createElement("span");
+timerArrow.className = "select-arrow";
+timerArrow.textContent = "▾";
+timerSelected.appendChild(timerArrow);
+
+timerSelectCustom.appendChild(timerSelected);
+
+const timerItems = document.createElement("div");
+timerItems.className = "select-items";
+timerSelectCustom.appendChild(timerItems);
+
+function updateTimerDisplay(minutes){
+  timerSelectedContent.innerHTML = `<span>${minutes} minutes</span>`;
+}
+
+for(let i=5; i<=60; i+=5){
+  const option = document.createElement("div");
+  option.innerHTML = `<span>${i} minutes</span>`;
+  option.onclick = ()=>{
+    selectedTimerMinutes = i;
+    updateTimerDisplay(i);
+    clearInterval(interval);
+    timer = i * 60;
+    totalTime = timer;
+    updateTimer();
+    localStorage.setItem("timer", i);
+    timerItems.classList.remove("open");
+    timerArrow.classList.remove("open");
+    isRunning = false;
+    timerContainer.classList.remove("breathing");
+  };
+  timerItems.appendChild(option);
+}
+
+timerSelected.onclick = ()=>{
+  const isOpen = timerItems.classList.toggle("open");
+  timerArrow.classList.toggle("open", isOpen);
+  // Close other dropdowns if open
+  items.classList.remove("open");
+  arrow.classList.remove("open");
+  focusItems.classList.remove("open");
+  focusArrow.classList.remove("open");
+};
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', (e) => {
+  if (!themeSelect.contains(e.target)) {
+    items.classList.remove("open");
+    arrow.classList.remove("open");
+  }
+  if (!timerSelectCustom.contains(e.target)) {
+    timerItems.classList.remove("open");
+    timerArrow.classList.remove("open");
+  }
+  if (!focusSelectCustom.contains(e.target)) {
+    focusItems.classList.remove("open");
+    focusArrow.classList.remove("open");
+  }
+});
+
+function applyTheme(name){
+  const t = themes[name];
+  card.style.background = t.bg;
+  document.querySelector('.header').style.color = t.text;
+  document.querySelector('.settings-gear').style.color = t.text;
+  focusDisplay.style.color = t.text;
+  timerDisplay.style.color = t.text;
+  progressCircle.style.stroke = t.text;
+
+  [startBtn,pauseBtn,resetBtn,saveBtn].forEach(btn=>{
+    btn.style.background = t.btnBg;
+    btn.style.color = t.btnText;
+  });
+}
+
+function updateTimer(){
+  const m=Math.floor(timer/60);
+  const s=timer%60;
+  timerDisplay.textContent =
+    String(m).padStart(2,'0')+":"+
+    String(s).padStart(2,'0');
+  updateProgressRing();
+}
+
+startBtn.onclick=()=>{
+  clearInterval(interval);
+  isRunning = true;
+  timerContainer.classList.add("breathing");
+  interval=setInterval(()=>{
+    if(timer>0){
+      timer--;
+      updateTimer();
+      // Check if timer just hit zero
+      if(timer === 0) {
+        clearInterval(interval);
+        isRunning = false;
+        timerContainer.classList.remove("breathing");
+        timerContainer.classList.add("complete");
+        playBellSound();
+        setTimeout(() => {
+          timerContainer.classList.remove("complete");
+        }, 1000);
+      }
+    }
+  },1000);
+};
+
+pauseBtn.onclick=()=>{
+  clearInterval(interval);
+  isRunning = false;
+  timerContainer.classList.remove("breathing");
+};
+
+resetBtn.onclick=()=>{
+  clearInterval(interval);
+  isRunning = false;
+  timerContainer.classList.remove("breathing");
+  timer=selectedTimerMinutes*60;
+  totalTime=timer;
+  updateTimer();
+};
+
+saveBtn.onclick=()=>{
+  timer=selectedTimerMinutes*60;
+  totalTime=timer;
+  updateTimer();
+  localStorage.setItem("theme",currentTheme);
+  localStorage.setItem("timer",selectedTimerMinutes);
+  items.classList.remove("open");
+  arrow.classList.remove("open");
+  timerItems.classList.remove("open");
+  timerArrow.classList.remove("open");
+  focusItems.classList.remove("open");
+  focusArrow.classList.remove("open");
+  document.getElementById("settingsPanel").classList.remove("open");
+  document.getElementById("timerContent").classList.remove("hidden");
+};
+
+document.getElementById("gear").onclick=()=>{
+  const panel=document.getElementById("settingsPanel");
+  const timerContent=document.getElementById("timerContent");
+  const isOpen = panel.classList.toggle("open");
+  timerContent.classList.toggle("hidden", isOpen);
+};
+
+window.onload=()=>{
+  const savedTheme=localStorage.getItem("theme")||"Default";
+  const savedTimer=localStorage.getItem("timer")||25;
+  const savedFocus=localStorage.getItem("focus")||"Focus";
+  
+  currentTheme=savedTheme;
+  selectedTimerMinutes=parseInt(savedTimer);
+  selectedFocus=savedFocus;
+  updateSelectedDisplay(savedTheme);
+  updateTimerDisplay(savedTimer);
+  updateFocusDisplay(savedFocus);
+  timer=savedTimer*60;
+  totalTime=timer;
+  focusDisplay.textContent=savedFocus;
+  
+  updateTimer();
+  applyTheme(savedTheme);
+};
+</script>
+
+</body>
+</html>
